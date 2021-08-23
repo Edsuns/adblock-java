@@ -11,15 +11,24 @@ import java.util.List;
  */
 public class FingerprintBucket extends HashBucket {
 
-    public FingerprintBucket(String data) {
+    public static class NoFingerprintException extends Exception {
+        public NoFingerprintException() {
+            super("No fingerprint found!");
+        }
+    }
+
+    public FingerprintBucket(String data) throws NoFingerprintException {
         generateHashes(data.toCharArray(), new FingerprintGenerator());
     }
 
-    private void generateHashes(char[] data, SubstringGenerator generator) {
+    private void generateHashes(char[] data, SubstringGenerator generator) throws NoFingerprintException {
         List<int[]> hashList = new ArrayList<>();
         char[] substring = new char[SUBSTRING_LENGTH];
         while (generator.next(data, substring)) {
             hashList.add(calcHashes(substring));
+        }
+        if (hashList.isEmpty()) {
+            throw new NoFingerprintException();
         }
         super.hashes = hashList.toArray(new int[0][0]);
     }

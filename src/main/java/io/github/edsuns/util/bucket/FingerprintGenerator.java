@@ -6,7 +6,7 @@ package io.github.edsuns.util.bucket;
 class FingerprintGenerator implements SubstringGenerator {
 
     private char[] buffer;
-    private int i = -1;
+    private int end = -1;
 
     private boolean isSeparatorChar(char c) {
         return c == '*' || c == '^' || c == '|';
@@ -14,23 +14,23 @@ class FingerprintGenerator implements SubstringGenerator {
 
     @Override
     public boolean next(char[] parent, char[] substring) {
-        if (i < 0) {
+        if (end < 0) {
             buffer = parent;
-            i = 0;
+            end = 0;
         }
-        int j = i;
+        int start = end;
         do {
-            if (substring.length + j > buffer.length) {
-                i = -1;
+            if (substring.length + start > buffer.length) {
+                end = -1;
                 return false;
             }
-            if (isSeparatorChar(buffer[j])) {
-                i = ++j;
+            if (isSeparatorChar(buffer[end])) {
+                start = ++end;
             } else {
-                i++;
+                end++;
             }
-        } while (i - j != substring.length);
-        System.arraycopy(buffer, j, substring, 0, substring.length);
+        } while (end - start != substring.length);
+        System.arraycopy(buffer, start, substring, 0, substring.length);
         return true;
     }
 }

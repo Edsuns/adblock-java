@@ -22,6 +22,11 @@ public class SubstringBucket extends HashBucket {
     private BloomFilter bloomFilter;
 
     public SubstringBucket(String data) {
+        if (data.length() < SUBSTRING_LENGTH) {
+            throw new IllegalArgumentException(String.format(
+                    "The length of `data` for SubstringBucket must be at least %d.", SUBSTRING_LENGTH
+            ));
+        }
         final int substringCount = data.length() - SUBSTRING_LENGTH + 1;
         this.data = data.toCharArray();
         this.generator = new FixedSIzeSubstringGenerator();

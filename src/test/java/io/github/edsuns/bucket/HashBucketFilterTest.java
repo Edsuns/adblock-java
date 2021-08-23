@@ -17,9 +17,22 @@ public class HashBucketFilterTest {
     private static final HashBucketFilter filter = new HashBucketFilter();
 
     @BeforeAll
-    static void preparePattern() {
+    static void preparePattern() throws FingerprintBucket.NoFingerprintException {
         final String pattern = "example.com/finger*/query";
         filter.add(new FingerprintBucket(pattern));
+    }
+
+    @Test
+    public void noFingerprint() {
+        final String noFingerprintPattern = "NoFi*print";
+        boolean hasException;
+        try {
+            filter.add(new FingerprintBucket(noFingerprintPattern));
+            hasException = false;
+        } catch (FingerprintBucket.NoFingerprintException e) {
+            hasException = true;
+        }
+        assertTrue(hasException);
     }
 
     @Test
