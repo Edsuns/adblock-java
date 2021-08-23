@@ -73,7 +73,7 @@ public class SubstringBucket extends HashBucket {
     protected void finalize() throws Throwable {
         super.finalize();
         if (bloomFilter != null) {
-            BloomFilterPool.onReturnToPool(bloomFilter);
+            BloomFilterPool.recycle(bloomFilter);
         }
     }
 

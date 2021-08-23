@@ -8,25 +8,50 @@ import java.util.LinkedList;
 public final class BloomFilterPool {
 
     public static final int FILTER_SIZE = 1024 * 512;
+    public static final int CREATED_COUNT_MAX = 8;
 
-    // TODO: Implement BloomFilterPool
-    private static final LinkedList<BloomFilter> pool = new LinkedList<>();
+    private static final LinkedList<BloomFilter> POOL = new LinkedList<>();
+    private static volatile boolean EMPTY = true;
+    private static volatile int CREATED_COUNT = 0;
 
-    static {
-        for (int i = 0; i < 6; i++) {
-            pool.push(new BloomFilter(FILTER_SIZE));
+    private BloomFilterPool() {
+        // private
+    }
+
+    public static BloomFilter getBloomFilter() {
+        synchronized (POOL) {
+            boolean interrupted = false;
+            try {
+                final BloomFilter filter;
+                if (EMPTY && CREATED_COUNT < CREATED_COUNT_MAX) {
+                    filter = new BloomFilter(FILTER_SIZE);
+                    CREATED_COUNT++;
+                } else {
+                    while (EMPTY) {
+                        try {
+                            POOL.wait();
+                        } catch (InterruptedException e) {
+                            interrupted = true;
+                        }
+                    }
+                    filter = POOL.pop();
+                    EMPTY = POOL.isEmpty();
+                }
+                return filter;
+            } finally {
+                if (interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
     }
 
-    private BloomFilterPool() {
-    }
-
-    public static synchronized BloomFilter getBloomFilter() {
-        return pool.pop();
-    }
-
-    public static synchronized void onReturnToPool(BloomFilter bloomFilter) {
+    public static void recycle(BloomFilter bloomFilter) {
         bloomFilter.clear();
-        pool.push(bloomFilter);
+        synchronized (POOL) {
+            POOL.push(bloomFilter);
+            EMPTY = POOL.isEmpty();
+            POOL.notify();
+        }
     }
 }

@@ -82,8 +82,14 @@ public class BitArrayTest {
         final int mod = size * BitArray.LAYER_SIZE;
         BitArray bitArray = new BitArray(size);
 
+        bitArray.set(-32);
+        bitArray.set(63 % mod);
+        bitArray.set(-63 % mod);
         bitArray.set(64 % mod);
         bitArray.set(-64 % mod);
+        assertTrue(bitArray.get(-32));
+        assertTrue(bitArray.get(63 % mod));
+        assertTrue(bitArray.get(-63 % mod));
         assertTrue(bitArray.get(64 % mod));
         assertTrue(bitArray.get(-64 % mod));
         assertTrue(bitArray.isSizeSticky());
