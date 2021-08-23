@@ -7,12 +7,14 @@ import java.util.LinkedList;
  */
 public final class BloomFilterPool {
 
+    public static final int FILTER_SIZE = 1024 * 512;
+
     // TODO: Implement BloomFilterPool
     private static final LinkedList<BloomFilter> pool = new LinkedList<>();
 
     static {
         for (int i = 0; i < 6; i++) {
-            pool.push(new BloomFilter(1024 * 2048));
+            pool.push(new BloomFilter(FILTER_SIZE));
         }
     }
 

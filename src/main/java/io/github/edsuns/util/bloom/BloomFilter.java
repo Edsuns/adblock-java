@@ -6,21 +6,23 @@ package io.github.edsuns.util.bloom;
 public class BloomFilter {
 
     private final BitArray bitArray;
+    private final int mod;
 
     public BloomFilter(int size) {
-        bitArray = new BitArray(size);
+        bitArray = new BitArray(size, true);
+        mod = size * BitArray.LAYER_SIZE;
     }
 
     public void add(int[] hashes) {
         for (int hash : hashes) {
-            bitArray.set(hash);
+            bitArray.set(hash % mod);
         }
     }
 
     public void add(int[][] hashes) {
         for (int[] hs : hashes) {
             for (int hash : hs) {
-                bitArray.set(hash);
+                bitArray.set(hash % mod);
             }
         }
     }
@@ -31,7 +33,7 @@ public class BloomFilter {
 
     public boolean contains(int[] hashes) {
         for (int hash : hashes) {
-            if (!bitArray.get(hash)) {
+            if (!bitArray.get(hash % mod)) {
                 return false;
             }
         }
@@ -41,7 +43,7 @@ public class BloomFilter {
     public boolean contains(int[][] hashes) {
         for (int[] hs : hashes) {
             for (int hash : hs) {
-                if (!bitArray.get(hash)) {
+                if (!bitArray.get(hash % mod)) {
                     return false;
                 }
             }

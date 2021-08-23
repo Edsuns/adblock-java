@@ -1,6 +1,7 @@
 package io.github.edsuns.util.bucket;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,6 +26,12 @@ public class FingerprintBucket extends HashBucket {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof FingerprintBucket) {
+            return Arrays.deepEquals(hashes, ((FingerprintBucket) obj).hashes);
+        }
         // The comparison between FingerprintBucket and SubstringBucket
         // is required to be performed at SubstringBucket.
         // And HashBucketFilter will call equals() of SubstringBucket.

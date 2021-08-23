@@ -53,12 +53,14 @@ public class BitArrayTest {
             -927053757, 44683609, 169225053, 695328501, 1654300033
     };
 
-    private static final BitArray bitArray = new BitArray(1024 * 2048);
+    private static final int SIZE = 1024 * 512;
+    private static final int MOD = SIZE * BitArray.LAYER_SIZE;
+    private static final BitArray bitArray = new BitArray(SIZE, true);
 
     @Test
     @Order(1)
     public void setBit() {
-        BitArray bitArray = new BitArray();
+        BitArray bitArray = new BitArray(32);
         bitArray.set(32);
         assertFalse(bitArray.get(36));
         assertTrue(bitArray.get(32));
@@ -67,7 +69,7 @@ public class BitArrayTest {
     @Test
     @Order(2)
     public void setNegativeBit() {
-        BitArray bitArray = new BitArray();
+        BitArray bitArray = new BitArray(32);
         bitArray.set(-32);
         assertFalse(bitArray.get(-36));
         assertTrue(bitArray.get(-32));
@@ -76,23 +78,28 @@ public class BitArrayTest {
     @Test
     @Order(3)
     public void isSizeSticky() {
-        BitArray bitArray = new BitArray(1);
-        bitArray.set(31);
-        bitArray.set(-32);
+        final int size = 1;
+        final int mod = size * BitArray.LAYER_SIZE;
+        BitArray bitArray = new BitArray(size);
 
-        assertTrue(bitArray.get(31));
-        assertTrue(bitArray.get(-32));
+        bitArray.set(64 % mod);
+        bitArray.set(-64 % mod);
+        assertTrue(bitArray.get(64 % mod));
+        assertTrue(bitArray.get(-64 % mod));
+        assertTrue(bitArray.isSizeSticky());
 
         assertFalse(bitArray.get(1024));
         assertFalse(bitArray.get(-1024));
 
-        assertTrue(bitArray.isSizeSticky());
+        bitArray.set(64);
+        bitArray.set(-64);
+        assertFalse(bitArray.isSizeSticky());
     }
 
     @Test
     @Order(4)
     public void clearBit() {
-        BitArray bitArray = new BitArray();
+        BitArray bitArray = new BitArray(32);
         bitArray.set(32);
         assertFalse(bitArray.get(36));
 
@@ -106,7 +113,7 @@ public class BitArrayTest {
     @Test
     @Order(5)
     public void clearAll() {
-        BitArray bitArray = new BitArray();
+        BitArray bitArray = new BitArray(32);
         bitArray.set(24);
         bitArray.set(32);
         bitArray.set(36);
@@ -128,7 +135,7 @@ public class BitArrayTest {
     @Order(6)
     public void performanceSet() {
         for (int h : hashes) {
-            bitArray.set(h);
+            bitArray.set(h % MOD);
         }
     }
 
@@ -137,7 +144,7 @@ public class BitArrayTest {
     public void performanceGet() {
         boolean get = true;
         for (int h : hashes) {
-            if (!bitArray.get(h)) {
+            if (!bitArray.get(h % MOD)) {
                 get = false;
                 break;
             }

@@ -12,10 +12,7 @@ public class HashBucketFilter extends HashSet<HashBucket> {
         if (!(hashBucket instanceof FingerprintBucket)) {
             throw new IllegalArgumentException("Element to add must be FingerprintBucket!");
         }
-        if (!hashBucket.all(super::add)) {
-            throw new RuntimeException("Failed to add a HashBucket!");
-        }
-        return true;
+        return hashBucket.all(super::add);
     }
 
     @Override

@@ -64,7 +64,7 @@ public class SubstringBucket extends HashBucket {
     private BloomFilter getBloomFilter() {
         if (bloomFilter == null) {
             bloomFilter = BloomFilterPool.getBloomFilter();
-            bloomFilter.add(hashes);// TODO: Optimize BitArray write performance.
+            bloomFilter.add(hashes);
         }
         return bloomFilter;
     }
