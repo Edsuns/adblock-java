@@ -1,8 +1,8 @@
-package io.github.edsuns.bucket;
+package io.github.edsuns.adblock.bucket;
 
-import io.github.edsuns.util.bucket.FingerprintBucket;
-import io.github.edsuns.util.bucket.HashBucketFilter;
-import io.github.edsuns.util.bucket.SubstringBucket;
+import io.github.edsuns.adblock.util.bucket.FingerprintBucket;
+import io.github.edsuns.adblock.util.bucket.HashBucketFilter;
+import io.github.edsuns.adblock.util.bucket.SubstringBucket;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

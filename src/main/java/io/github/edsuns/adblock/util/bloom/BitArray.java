@@ -1,4 +1,4 @@
-package io.github.edsuns.util.bloom;
+package io.github.edsuns.adblock.util.bloom;
 
 import java.util.Arrays;
 

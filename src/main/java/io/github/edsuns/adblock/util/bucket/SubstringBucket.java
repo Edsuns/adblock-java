@@ -1,7 +1,7 @@
-package io.github.edsuns.util.bucket;
+package io.github.edsuns.adblock.util.bucket;
 
-import io.github.edsuns.util.bloom.BloomFilter;
-import io.github.edsuns.util.bloom.BloomFilterPool;
+import io.github.edsuns.adblock.util.bloom.BloomFilter;
+import io.github.edsuns.adblock.util.bloom.BloomFilterPool;
 
 import javax.annotation.Nullable;
 
@@ -29,7 +29,7 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
             substringCount = 0;
         }
         this.data = data.toCharArray();
-        this.generator = new FixedSIzeSubstringGenerator();
+        this.generator = new FixedSizeSubstringGenerator();
         super.hashes = new int[substringCount][HASH_FUNCTION_COUNT];
         this.substrings = new char[substringCount][SUBSTRING_LENGTH];
     }

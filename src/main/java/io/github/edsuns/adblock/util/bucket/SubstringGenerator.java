@@ -1,4 +1,4 @@
-package io.github.edsuns.util.bucket;
+package io.github.edsuns.adblock.util.bucket;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/20.

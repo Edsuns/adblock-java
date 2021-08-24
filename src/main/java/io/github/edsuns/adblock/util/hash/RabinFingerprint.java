@@ -1,4 +1,4 @@
-package io.github.edsuns.util.hash;
+package io.github.edsuns.adblock.util.hash;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/20.

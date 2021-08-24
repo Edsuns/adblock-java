@@ -1,6 +1,6 @@
-package io.github.edsuns.bloom;
+package io.github.edsuns.adblock.bloom;
 
-import io.github.edsuns.util.bloom.BloomFilter;
+import io.github.edsuns.adblock.util.bloom.BloomFilter;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

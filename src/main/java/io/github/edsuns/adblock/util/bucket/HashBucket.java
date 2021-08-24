@@ -1,6 +1,6 @@
-package io.github.edsuns.util.bucket;
+package io.github.edsuns.adblock.util.bucket;
 
-import io.github.edsuns.util.hash.RabinFingerprint;
+import io.github.edsuns.adblock.util.hash.RabinFingerprint;
 
 import java.util.function.Predicate;
 

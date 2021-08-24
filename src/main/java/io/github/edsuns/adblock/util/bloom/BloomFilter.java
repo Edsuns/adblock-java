@@ -1,4 +1,4 @@
-package io.github.edsuns.util.bloom;
+package io.github.edsuns.adblock.util.bloom;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/21.

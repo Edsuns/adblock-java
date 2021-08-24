@@ -1,7 +1,7 @@
-package io.github.edsuns.hash;
+package io.github.edsuns.adblock.hash;
 
-import io.github.edsuns.util.hash.RabinFingerprint;
-import io.github.edsuns.util.hash.RabinKarpAlgorithm;
+import io.github.edsuns.adblock.util.hash.RabinFingerprint;
+import io.github.edsuns.adblock.util.hash.RabinKarpAlgorithm;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

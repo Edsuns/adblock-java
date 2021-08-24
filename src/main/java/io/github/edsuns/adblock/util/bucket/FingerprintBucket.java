@@ -1,4 +1,4 @@
-package io.github.edsuns.util.bucket;
+package io.github.edsuns.adblock.util.bucket;
 
 import java.util.ArrayList;
 import java.util.Arrays;

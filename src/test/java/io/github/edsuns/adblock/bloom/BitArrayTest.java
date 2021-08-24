@@ -1,6 +1,6 @@
-package io.github.edsuns.bloom;
+package io.github.edsuns.adblock.bloom;
 
-import io.github.edsuns.util.bloom.BitArray;
+import io.github.edsuns.adblock.util.bloom.BitArray;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

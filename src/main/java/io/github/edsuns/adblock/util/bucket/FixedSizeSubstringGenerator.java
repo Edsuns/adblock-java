@@ -1,11 +1,11 @@
-package io.github.edsuns.util.bucket;
+package io.github.edsuns.adblock.util.bucket;
 
 import javax.annotation.Nullable;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/21.
  */
-class FixedSIzeSubstringGenerator implements SubstringGenerator {
+class FixedSizeSubstringGenerator implements SubstringGenerator {
 
     @Nullable
     private char[] buffer;
