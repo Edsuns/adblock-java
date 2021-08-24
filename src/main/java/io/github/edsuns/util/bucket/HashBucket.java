@@ -51,20 +51,16 @@ public abstract class HashBucket {
         return false;
     }
 
-    int[] getMainHashes() {
-        if (mainHashIndex < 0) {
-            throw new IndexOutOfBoundsException("Must change `changeMainHash()` first!");
-        }
-        return hashes[mainHashIndex];
-    }
-
     protected int getMainHashIndex() {
         return mainHashIndex;
     }
 
     @Override
     public int hashCode() {
-        return getMainHashes()[PRIMARY_INDEX];
+        if (mainHashIndex < 0 || hashes.length <= 0) {
+            return 0;
+        }
+        return hashes[mainHashIndex][PRIMARY_INDEX];
     }
 
     protected static int[] calcHashes(char[] substring) {

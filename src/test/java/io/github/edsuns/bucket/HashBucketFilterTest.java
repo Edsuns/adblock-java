@@ -38,18 +38,32 @@ public class HashBucketFilterTest {
     @Test
     public void contains() {
         final String url = "https://example.com/fingerprint/query";
-        assertTrue(filter.contains(new SubstringBucket(url)));
+        try (SubstringBucket bucket = new SubstringBucket(url)) {
+            assertTrue(filter.contains(bucket));
+        }
     }
 
     @Test
     public void containsNegative() {
         final String url = "https://example.com/fingerprint/send";
-        assertFalse(filter.contains(new SubstringBucket(url)));
+        try (SubstringBucket bucket = new SubstringBucket(url)) {
+            assertFalse(filter.contains(bucket));
+        }
+    }
+
+    @Test
+    public void containsNegativeOnNoSubstring() {
+        final String url = "short";
+        try (SubstringBucket bucket = new SubstringBucket(url)) {
+            assertFalse(filter.contains(bucket));
+        }
     }
 
     @Test
     public void containsTotallyNegative() {
         final String url = "https://negative.io/negative/negative";
-        assertFalse(filter.contains(new SubstringBucket(url)));
+        try (SubstringBucket bucket = new SubstringBucket(url)) {
+            assertFalse(filter.contains(bucket));
+        }
     }
 }

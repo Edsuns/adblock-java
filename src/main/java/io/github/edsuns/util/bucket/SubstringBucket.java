@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
  * <p>
  * No need to implement multi-thread safe.
  */
-public class SubstringBucket extends HashBucket {
+public class SubstringBucket extends HashBucket implements AutoCloseable {
 
     private final char[] data;
     private final SubstringGenerator generator;
@@ -22,12 +22,12 @@ public class SubstringBucket extends HashBucket {
     private BloomFilter bloomFilter;
 
     public SubstringBucket(String data) {
-        if (data.length() < SUBSTRING_LENGTH) {
-            throw new IllegalArgumentException(String.format(
-                    "The length of `data` for SubstringBucket must be at least %d.", SUBSTRING_LENGTH
-            ));
+        final int substringCount;
+        if (data.length() >= SUBSTRING_LENGTH) {
+            substringCount = data.length() - SUBSTRING_LENGTH + 1;
+        } else {
+            substringCount = 0;
         }
-        final int substringCount = data.length() - SUBSTRING_LENGTH + 1;
         this.data = data.toCharArray();
         this.generator = new FixedSIzeSubstringGenerator();
         super.hashes = new int[substringCount][HASH_FUNCTION_COUNT];
@@ -35,7 +35,7 @@ public class SubstringBucket extends HashBucket {
     }
 
     private void ensureHashes() {
-        if (allHashesGenerated) {
+        if (allHashesGenerated || hashes.length <= 0) {
             return;
         }
         for (int i = getMainHashIndex() + 1; i < hashes.length; i++) {
@@ -48,9 +48,9 @@ public class SubstringBucket extends HashBucket {
         allHashesGenerated = true;
     }
 
-    private void ensurePrimaryHash() {
+    private void ensureMainHashes() {
         int mainIndex = getMainHashIndex();
-        if (allHashesGenerated) {
+        if (allHashesGenerated || hashes.length <= 0) {
             return;
         }
         char[] substring = new char[SUBSTRING_LENGTH];
@@ -77,20 +77,21 @@ public class SubstringBucket extends HashBucket {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        if (bloomFilter != null) {
-            BloomFilterPool.recycle(bloomFilter);
-        }
+        close();
     }
 
     @Override
     protected void onMainHashChanged() {
-        ensurePrimaryHash();
+        ensureMainHashes();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
+        }
+        if (hashes.length <= 0) {
+            return false;
         }
         if (obj instanceof HashBucket) {
             return containsHashes((HashBucket) obj);
@@ -102,5 +103,12 @@ public class SubstringBucket extends HashBucket {
         ensureHashes();
         final BloomFilter filter = getBloomFilter();
         return filter.contains(bucket.hashes);
+    }
+
+    @Override
+    public void close() {
+        if (bloomFilter != null) {
+            BloomFilterPool.recycle(bloomFilter);
+        }
     }
 }
