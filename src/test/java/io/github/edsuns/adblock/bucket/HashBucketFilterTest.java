@@ -6,15 +6,14 @@ import io.github.edsuns.adblock.util.bucket.SubstringBucket;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/21.
  */
 public class HashBucketFilterTest {
 
-    private static final HashBucketFilter filter = new HashBucketFilter();
+    private static final HashBucketFilter<FingerprintBucket> filter = new HashBucketFilter<>();
 
     @BeforeAll
     static void preparePattern() throws FingerprintBucket.NoFingerprintException {
@@ -39,7 +38,7 @@ public class HashBucketFilterTest {
     public void contains() {
         final String url = "https://example.com/fingerprint/query";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
-            assertTrue(filter.contains(bucket));
+            assertNotNull(filter.matches(bucket));
         }
     }
 
@@ -47,7 +46,7 @@ public class HashBucketFilterTest {
     public void containsNegative() {
         final String url = "https://example.com/fingerprint/send";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
-            assertFalse(filter.contains(bucket));
+            assertNull(filter.matches(bucket));
         }
     }
 
@@ -55,7 +54,7 @@ public class HashBucketFilterTest {
     public void containsNegativeOnNoSubstring() {
         final String url = "short";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
-            assertFalse(filter.contains(bucket));
+            assertNull(filter.matches(bucket));
         }
     }
 
@@ -63,7 +62,7 @@ public class HashBucketFilterTest {
     public void containsTotallyNegative() {
         final String url = "https://negative.io/negative/negative";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
-            assertFalse(filter.contains(bucket));
+            assertNull(filter.matches(bucket));
         }
     }
 }

@@ -2,7 +2,8 @@ package io.github.edsuns.adblock.util.bucket;
 
 import io.github.edsuns.adblock.util.hash.RabinFingerprint;
 
-import java.util.function.Predicate;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/20.
@@ -31,24 +32,22 @@ public abstract class HashBucket {
         // do nothing
     }
 
-    boolean all(Predicate<HashBucket> consume) {
+    void forEach(Consumer<HashBucket> consumer) {
         for (mainHashIndex = 0; mainHashIndex < hashes.length; mainHashIndex++) {
             onMainHashChanged();
-            if (!consume.test(this)) {
-                return false;
-            }
+            consumer.accept(this);
         }
-        return true;
     }
 
-    boolean any(Predicate<HashBucket> consume) {
+    <T> T anyNotNullOf(Function<HashBucket, T> consumer) {
+        T bucket;
         for (mainHashIndex = 0; mainHashIndex < hashes.length; mainHashIndex++) {
             onMainHashChanged();
-            if (consume.test(this)) {
-                return true;
+            if ((bucket = consumer.apply(this)) != null) {
+                return bucket;
             }
         }
-        return false;
+        return null;
     }
 
     protected int getMainHashIndex() {

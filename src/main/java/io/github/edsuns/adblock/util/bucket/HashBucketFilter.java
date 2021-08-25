@@ -1,29 +1,40 @@
 package io.github.edsuns.adblock.util.bucket;
 
-import java.util.HashSet;
+import java.util.HashMap;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/20.
  */
-public class HashBucketFilter extends HashSet<HashBucket> {
+public class HashBucketFilter<T> {
 
-    @Override
-    public boolean add(HashBucket hashBucket) {
-        if (!(hashBucket instanceof FingerprintBucket)) {
-            throw new IllegalArgumentException("Element to add must be FingerprintBucket!");
-        }
-        return hashBucket.all(super::add);
+    private final HashMap<HashBucket, T> container = new HashMap<>();
+
+    /**
+     * Add {@link FingerprintBucket} with relative data.
+     *
+     * @param fingerprints fingerprints
+     * @param relative     data related to fingerprints
+     */
+    public void put(FingerprintBucket fingerprints, T relative) {
+        fingerprints.forEach((bucket) -> container.put(bucket, relative));
     }
 
-    @Override
-    public boolean contains(Object o) {
-        if (o instanceof SubstringBucket) {
-            return contains((SubstringBucket) o);
-        }
-        throw new IllegalArgumentException("Element to query must be SubstringBucket!");
+    /**
+     * Add {@link FingerprintBucket} and use itself as the relative data.
+     *
+     * @see HashBucketFilter#put(FingerprintBucket, Object)
+     */
+    public void add(T fingerprints) {
+        put((FingerprintBucket) fingerprints, fingerprints);
     }
 
-    public boolean contains(SubstringBucket substringBucket) {
-        return substringBucket.any(super::contains);
+    /**
+     * Find matched relative data {@link T} for {@link SubstringBucket}.
+     *
+     * @param substringBucket target
+     * @return matched {@link T}, or null if no matched
+     */
+    public T matches(SubstringBucket substringBucket) {
+        return substringBucket.anyNotNullOf(container::get);
     }
 }
