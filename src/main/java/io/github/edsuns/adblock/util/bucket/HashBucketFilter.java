@@ -7,7 +7,15 @@ import java.util.HashMap;
  */
 public class HashBucketFilter<T> {
 
-    private final HashMap<HashBucket, T> container = new HashMap<>();
+    private final HashMap<HashBucket, T> container;
+
+    public HashBucketFilter() {
+        this(20000);
+    }
+
+    public HashBucketFilter(int initialCapacity) {
+        container = new HashMap<>(initialCapacity);
+    }
 
     /**
      * Add {@link FingerprintBucket} with relative data.
