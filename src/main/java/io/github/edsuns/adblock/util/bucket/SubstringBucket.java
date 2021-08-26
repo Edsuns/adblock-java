@@ -4,6 +4,7 @@ import io.github.edsuns.adblock.util.bloom.BloomFilter;
 import io.github.edsuns.adblock.util.bloom.BloomFilterPool;
 
 import javax.annotation.Nullable;
+import java.util.function.Function;
 
 /**
  * Created by Edsuns@qq.com on 2021/8/20.
@@ -22,13 +23,17 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
     private BloomFilter bloomFilter;
 
     public SubstringBucket(String data) {
+        this(data.toCharArray());
+    }
+
+    public SubstringBucket(char[] data) {
         final int substringCount;
-        if (data.length() >= SUBSTRING_LENGTH) {
-            substringCount = data.length() - SUBSTRING_LENGTH + 1;
+        if (data.length >= SUBSTRING_LENGTH) {
+            substringCount = data.length - SUBSTRING_LENGTH + 1;
         } else {
             substringCount = 0;
         }
-        this.data = data.toCharArray();
+        this.data = data;
         this.generator = new FixedSizeSubstringGenerator();
         super.hashes = new int[substringCount][HASH_FUNCTION_COUNT];
         this.substrings = new char[substringCount][SUBSTRING_LENGTH];
@@ -38,7 +43,7 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         if (allHashesGenerated || hashes.length <= 0) {
             return;
         }
-        for (int i = getMainHashIndex() + 1; i < hashes.length; i++) {
+        for (int i = mainHashIndex + 1; i < hashes.length; i++) {
             if (i == 0) {
                 hashes[i] = calcHashes(substrings[i]);
             } else {
@@ -49,7 +54,7 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
     }
 
     private void ensureMainHashes() {
-        int mainIndex = getMainHashIndex();
+        int mainIndex = mainHashIndex;
         if (allHashesGenerated || hashes.length <= 0) {
             return;
         }
@@ -66,6 +71,17 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         }
     }
 
+    <T> T anyNotNullOf(Function<HashBucket, T> consumer) {
+        T bucket;
+        for (mainHashIndex = 0; mainHashIndex < hashes.length; mainHashIndex++) {
+            ensureMainHashes();
+            if ((bucket = consumer.apply(this)) != null) {
+                return bucket;
+            }
+        }
+        return null;
+    }
+
     private BloomFilter getBloomFilter() {
         if (bloomFilter == null) {
             bloomFilter = BloomFilterPool.getBloomFilter();
@@ -74,15 +90,10 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         return bloomFilter;
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        close();
-    }
-
-    @Override
-    protected void onMainHashChanged() {
-        ensureMainHashes();
+    private boolean containsHashes(HashBucket bucket) {
+        ensureHashes();
+        final BloomFilter filter = getBloomFilter();
+        return filter.contains(bucket.hashes);
     }
 
     @Override
@@ -99,16 +110,16 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         return false;
     }
 
-    public boolean containsHashes(HashBucket bucket) {
-        ensureHashes();
-        final BloomFilter filter = getBloomFilter();
-        return filter.contains(bucket.hashes);
-    }
-
     @Override
     public void close() {
         if (bloomFilter != null) {
             BloomFilterPool.recycle(bloomFilter);
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        close();
     }
 }

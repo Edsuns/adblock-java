@@ -24,7 +24,7 @@ public class HashBucketFilter<T> {
      * @param relative     data related to fingerprints
      */
     public void put(FingerprintBucket fingerprints, T relative) {
-        fingerprints.forEach((bucket) -> container.put(bucket, relative));
+        container.put(fingerprints, relative);
     }
 
     /**

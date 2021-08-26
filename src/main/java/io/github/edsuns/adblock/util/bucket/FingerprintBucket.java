@@ -18,7 +18,12 @@ public class FingerprintBucket extends HashBucket {
     }
 
     public FingerprintBucket(String data) throws NoFingerprintException {
-        generateHashes(data.toCharArray(), new FingerprintGenerator());
+        this(data.toCharArray());
+    }
+
+    public FingerprintBucket(char[] data) throws NoFingerprintException {
+        generateHashes(data, new FingerprintGenerator());
+        mainHashIndex = 0;// only need to put the leading substring hash in HashBucketFilter
     }
 
     private void generateHashes(char[] data, SubstringGenerator generator) throws NoFingerprintException {
