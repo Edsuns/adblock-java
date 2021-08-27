@@ -35,7 +35,7 @@ public class HashBucketFilterTest {
     }
 
     @Test
-    public void contains() {
+    public void matched() {
         final String url = "https://example.com/fingerprint/query";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
             assertNotNull(filter.matches(bucket));
@@ -43,7 +43,7 @@ public class HashBucketFilterTest {
     }
 
     @Test
-    public void containsNegative() {
+    public void matchNegative() {
         final String url = "https://example.com/fingerprint/send";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
             assertNull(filter.matches(bucket));
@@ -51,7 +51,7 @@ public class HashBucketFilterTest {
     }
 
     @Test
-    public void containsNegativeOnNoSubstring() {
+    public void matchNegativeOnNoSubstring() {
         final String url = "short";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
             assertNull(filter.matches(bucket));
@@ -59,7 +59,7 @@ public class HashBucketFilterTest {
     }
 
     @Test
-    public void containsTotallyNegative() {
+    public void matchTotallyNegative() {
         final String url = "https://negative.io/negative/negative";
         try (SubstringBucket bucket = new SubstringBucket(url)) {
             assertNull(filter.matches(bucket));

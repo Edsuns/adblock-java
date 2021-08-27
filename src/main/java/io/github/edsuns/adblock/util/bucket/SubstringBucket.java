@@ -114,6 +114,7 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
     public void close() {
         if (bloomFilter != null) {
             BloomFilterPool.recycle(bloomFilter);
+            bloomFilter = null;
         }
     }
 
