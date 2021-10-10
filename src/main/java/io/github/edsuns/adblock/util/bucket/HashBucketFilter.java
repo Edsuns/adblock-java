@@ -6,9 +6,31 @@ import java.util.HashMap;
 /**
  * Created by Edsuns@qq.com on 2021/8/20.
  */
-public class HashBucketFilter<T> {
+public class HashBucketFilter {
 
-    private final HashMap<HashBucket, T> container;
+    @Nullable
+    private static ExtraDataMatcher EXTRA_DATA_MATCHER;
+
+    /**
+     * Used by {@link HashBucketFilter#matchExtraData(FingerprintBucket.ExtraData, SubstringBucket.ExtraData)}.
+     *
+     * @param extraDataMatcher null to disable extra data match
+     */
+    public static void setExtraDataMatcher(@Nullable ExtraDataMatcher extraDataMatcher) {
+        HashBucketFilter.EXTRA_DATA_MATCHER = extraDataMatcher;
+    }
+
+    /**
+     * Used by {@link SubstringBucket#equals(Object)}.
+     *
+     * @return true if {@link HashBucketFilter#EXTRA_DATA_MATCHER} is null, or match the params and return
+     * @see ExtraDataMatcher#matches(FingerprintBucket.ExtraData, SubstringBucket.ExtraData)
+     */
+    static boolean matchExtraData(FingerprintBucket.ExtraData fExtraData, SubstringBucket.ExtraData sExtraData) {
+        return EXTRA_DATA_MATCHER == null || EXTRA_DATA_MATCHER.matches(fExtraData, sExtraData);
+    }
+
+    private final HashMap<HashBucket, FingerprintBucket> container;
 
     public HashBucketFilter() {
         this(20000);
@@ -19,32 +41,22 @@ public class HashBucketFilter<T> {
     }
 
     /**
-     * Add {@link FingerprintBucket} with relative data.
+     * Add {@link FingerprintBucket}.
      *
      * @param fingerprints fingerprints
-     * @param relative     data related to fingerprints
      */
-    public void put(FingerprintBucket fingerprints, T relative) {
-        container.put(fingerprints, relative);
+    public void add(FingerprintBucket fingerprints) {
+        container.put(fingerprints, fingerprints);
     }
 
     /**
-     * Add {@link FingerprintBucket} and use itself as the relative data.
-     *
-     * @see HashBucketFilter#put(FingerprintBucket, Object)
-     */
-    public void add(T fingerprints) {
-        put((FingerprintBucket) fingerprints, fingerprints);
-    }
-
-    /**
-     * Find matched relative data {@link T} for {@link SubstringBucket}.
+     * Find matched {@link FingerprintBucket} for {@link SubstringBucket}.
      *
      * @param substringBucket target
-     * @return matched {@link T}, or null if no matched
+     * @return matched {@link FingerprintBucket}, or null if no matched
      */
     @Nullable
-    public T matches(SubstringBucket substringBucket) {
+    public FingerprintBucket matches(SubstringBucket substringBucket) {
         return substringBucket.anyNotNullOf(container::get);
     }
 }

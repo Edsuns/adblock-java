@@ -15,8 +15,13 @@ import java.util.function.Function;
  */
 public class SubstringBucket extends HashBucket implements AutoCloseable {
 
+    public interface ExtraData {
+    }
+
     private final char[] data;
     private final SubstringGenerator generator;
+
+    final ExtraData extraData;
 
     private boolean allHashesGenerated = false;
 
@@ -25,10 +30,16 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
     private BloomFilter bloomFilter;
 
     public SubstringBucket(String data) {
-        this(data.toCharArray());
+        this(data.toCharArray(), new ExtraData() {
+        });
     }
 
-    public SubstringBucket(char[] data) {
+    public SubstringBucket(String data, ExtraData extraData) {
+        this(data.toCharArray(), extraData);
+    }
+
+    public SubstringBucket(char[] data, ExtraData extraData) {
+        this.extraData = extraData;
         final int substringCount;
         if (data.length >= SUBSTRING_LENGTH) {
             substringCount = data.length - SUBSTRING_LENGTH + 1;
@@ -39,6 +50,10 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         this.generator = new FixedSizeSubstringGenerator();
         super.hashes = new int[substringCount][HASH_FUNCTION_COUNT];
         this.substrings = new char[substringCount][SUBSTRING_LENGTH];
+    }
+
+    public ExtraData getExtraData() {
+        return extraData;
     }
 
     private void ensureHashes() {
@@ -107,8 +122,11 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         if (hashes.length <= 0) {
             return false;
         }
-        if (obj instanceof HashBucket) {
-            return containsHashes((HashBucket) obj);
+        if (obj instanceof FingerprintBucket) {
+            // match with FingerprintBucket including extra data
+            final FingerprintBucket fingerprintBucket = (FingerprintBucket) obj;
+            return containsHashes(fingerprintBucket)
+                    && HashBucketFilter.matchExtraData(fingerprintBucket.extraData, extraData);
         }
         return false;
     }

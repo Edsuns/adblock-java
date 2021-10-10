@@ -13,17 +13,28 @@ import java.util.List;
  */
 public class FingerprintBucket extends HashBucket {
 
+    public interface ExtraData {
+    }
+
     public static class NoFingerprintException extends Exception {
         public NoFingerprintException() {
             super("No fingerprint found!");
         }
     }
 
+    final ExtraData extraData;
+
     public FingerprintBucket(String data) throws NoFingerprintException {
-        this(data.toCharArray());
+        this(data.toCharArray(), new ExtraData() {
+        });
     }
 
-    public FingerprintBucket(char[] data) throws NoFingerprintException {
+    public FingerprintBucket(String data, ExtraData extraData) throws NoFingerprintException {
+        this(data.toCharArray(), extraData);
+    }
+
+    public FingerprintBucket(char[] data, ExtraData extraData) throws NoFingerprintException {
+        this.extraData = extraData;
         generateHashes(data, new FingerprintGenerator());
         mainHashIndex = 0;// only need to put the leading substring hash in HashBucketFilter
     }
@@ -38,6 +49,10 @@ public class FingerprintBucket extends HashBucket {
             throw new NoFingerprintException();
         }
         super.hashes = hashList.toArray(new int[0][0]);
+    }
+
+    public ExtraData getExtraData() {
+        return extraData;
     }
 
     @Override

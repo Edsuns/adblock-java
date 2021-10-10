@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class HashBucketFilterTest {
 
-    private static final HashBucketFilter<FingerprintBucket> filter = new HashBucketFilter<>();
+    private static final HashBucketFilter filter = new HashBucketFilter();
 
     @BeforeAll
     static void preparePattern() throws FingerprintBucket.NoFingerprintException {
