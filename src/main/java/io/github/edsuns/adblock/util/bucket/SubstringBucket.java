@@ -9,6 +9,8 @@ import java.util.function.Function;
 /**
  * Created by Edsuns@qq.com on 2021/8/20.
  * <p>
+ * Used as the param of {@link java.util.HashMap#get(Object)}.
+ * <p>
  * No need to implement multi-thread safe.
  */
 public class SubstringBucket extends HashBucket implements AutoCloseable {
@@ -71,6 +73,7 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         }
     }
 
+    @Nullable
     <T> T anyNotNullOf(Function<HashBucket, T> consumer) {
         T bucket;
         for (mainHashIndex = 0; mainHashIndex < hashes.length; mainHashIndex++) {

@@ -7,6 +7,8 @@ import java.util.List;
 /**
  * Created by Edsuns@qq.com on 2021/8/20.
  * <p>
+ * Used as the params of {@link java.util.HashMap#put(Object, Object)}.
+ * <p>
  * No need to implement multi-thread safe.
  */
 public class FingerprintBucket extends HashBucket {
@@ -48,7 +50,7 @@ public class FingerprintBucket extends HashBucket {
         }
         // The comparison between FingerprintBucket and SubstringBucket
         // is required to be performed at SubstringBucket.
-        // And HashBucketFilter will call equals() of SubstringBucket.
+        // And HashBucketFilter.matches() will call equals() of SubstringBucket indirectly.
         throw new RuntimeException("Calling `equals()` is not allowed!");
     }
 }

@@ -1,5 +1,6 @@
 package io.github.edsuns.adblock.util.bucket;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 
 /**
@@ -42,6 +43,7 @@ public class HashBucketFilter<T> {
      * @param substringBucket target
      * @return matched {@link T}, or null if no matched
      */
+    @Nullable
     public T matches(SubstringBucket substringBucket) {
         return substringBucket.anyNotNullOf(container::get);
     }
