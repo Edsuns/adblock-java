@@ -6,6 +6,8 @@ import io.github.edsuns.adblock.util.bucket.SubstringBucket;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import javax.annotation.Nullable;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -13,12 +15,42 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class HashBucketFilterTest {
 
-    private static final HashBucketFilter filter = new HashBucketFilter();
+    static class Substrings extends SubstringBucket<String, Integer> {
+        public Substrings(String data) {
+            super(data);
+        }
+
+        @Nullable
+        @Override
+        protected String generateExtraData(String source) {
+            return source;
+        }
+
+        @Override
+        protected boolean fullyMatches(@Nullable String sExtraData, @Nullable Integer fExtraData) {
+            return sExtraData != null && fExtraData != null;
+        }
+    }
+
+    static class Fingerprints extends FingerprintBucket<Integer> {
+        public Fingerprints(String data) throws NoFingerprintException {
+            super(data);
+        }
+
+        @Nullable
+        @Override
+        protected Integer generateExtraData(String source) {
+            return source.length();
+        }
+    }
+
+    private static final HashBucketFilter<String, Integer> filter = new HashBucketFilter<>();
+
+    static final String pattern = "example.com/finger*/query";
 
     @BeforeAll
     static void preparePattern() throws FingerprintBucket.NoFingerprintException {
-        final String pattern = "example.com/finger*/query";
-        filter.add(new FingerprintBucket(pattern));
+        filter.add(new Fingerprints(pattern));
     }
 
     @Test
@@ -26,7 +58,7 @@ public class HashBucketFilterTest {
         final String noFingerprintPattern = "NoFi*print";
         boolean hasException;
         try {
-            filter.add(new FingerprintBucket(noFingerprintPattern));
+            filter.add(new Fingerprints(noFingerprintPattern));
             hasException = false;
         } catch (FingerprintBucket.NoFingerprintException e) {
             hasException = true;
@@ -35,17 +67,29 @@ public class HashBucketFilterTest {
     }
 
     @Test
+    public void matchedOriginal() {
+        final String url = "https://example.com/fingerprint/query";
+        try (SubstringBucket<String, Integer> bucket = new SubstringBucket<>(url)) {
+            FingerprintBucket<Integer> actual = filter.matches(bucket);
+            assertNotNull(actual);
+            assertEquals(pattern.length(), actual.getExtraData());
+        }
+    }
+
+    @Test
     public void matched() {
         final String url = "https://example.com/fingerprint/query";
-        try (SubstringBucket bucket = new SubstringBucket(url)) {
-            assertNotNull(filter.matches(bucket));
+        try (Substrings bucket = new Substrings(url)) {
+            FingerprintBucket<Integer> actual = filter.matches(bucket);
+            assertNotNull(actual);
+            assertEquals(pattern.length(), actual.getExtraData());
         }
     }
 
     @Test
     public void matchNegative() {
         final String url = "https://example.com/fingerprint/send";
-        try (SubstringBucket bucket = new SubstringBucket(url)) {
+        try (Substrings bucket = new Substrings(url)) {
             assertNull(filter.matches(bucket));
         }
     }
@@ -53,7 +97,7 @@ public class HashBucketFilterTest {
     @Test
     public void matchNegativeOnNoSubstring() {
         final String url = "short";
-        try (SubstringBucket bucket = new SubstringBucket(url)) {
+        try (Substrings bucket = new Substrings(url)) {
             assertNull(filter.matches(bucket));
         }
     }
@@ -61,7 +105,7 @@ public class HashBucketFilterTest {
     @Test
     public void matchTotallyNegative() {
         final String url = "https://negative.io/negative/negative";
-        try (SubstringBucket bucket = new SubstringBucket(url)) {
+        try (Substrings bucket = new Substrings(url)) {
             assertNull(filter.matches(bucket));
         }
     }

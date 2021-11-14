@@ -4,6 +4,7 @@ import io.github.edsuns.adblock.util.bloom.BloomFilter;
 import io.github.edsuns.adblock.util.bloom.BloomFilterPool;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.function.Function;
 
 /**
@@ -13,15 +14,13 @@ import java.util.function.Function;
  * <p>
  * No need to implement multi-thread safe.
  */
-public class SubstringBucket extends HashBucket implements AutoCloseable {
-
-    public interface ExtraData {
-    }
+public class SubstringBucket<S, F extends Serializable> extends HashBucket implements AutoCloseable {
 
     private final char[] data;
     private final SubstringGenerator generator;
 
-    final ExtraData extraData;
+    @Nullable
+    final S extraData;
 
     private boolean allHashesGenerated = false;
 
@@ -30,29 +29,42 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
     private BloomFilter bloomFilter;
 
     public SubstringBucket(String data) {
-        this(data.toCharArray(), new ExtraData() {
-        });
-    }
-
-    public SubstringBucket(String data, ExtraData extraData) {
-        this(data.toCharArray(), extraData);
-    }
-
-    public SubstringBucket(char[] data, ExtraData extraData) {
-        this.extraData = extraData;
+        final char[] dataArr = data.toCharArray();
+        this.extraData = generateExtraData(data);
         final int substringCount;
-        if (data.length >= SUBSTRING_LENGTH) {
-            substringCount = data.length - SUBSTRING_LENGTH + 1;
+        if (dataArr.length >= SUBSTRING_LENGTH) {
+            substringCount = dataArr.length - SUBSTRING_LENGTH + 1;
         } else {
             substringCount = 0;
         }
-        this.data = data;
-        this.generator = new FixedSizeSubstringGenerator();
+        this.data = dataArr;
+        this.generator = createGenerator();
         super.hashes = new int[substringCount][HASH_FUNCTION_COUNT];
         this.substrings = new char[substringCount][SUBSTRING_LENGTH];
     }
 
-    public ExtraData getExtraData() {
+    /**
+     * Create {@link SubstringGenerator}. Override this method to provide custom generator.
+     *
+     * @return newly created generator
+     */
+    protected SubstringGenerator createGenerator() {
+        return new FixedSizeSubstringGenerator();
+    }
+
+    /**
+     * Create extra data from source data.
+     *
+     * @param source data passed from the constructor
+     * @return extra data
+     */
+    @Nullable
+    protected S generateExtraData(String source) {
+        return null;
+    }
+
+    @Nullable
+    public S getExtraData() {
         return extraData;
     }
 
@@ -114,6 +126,10 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         return filter.contains(bucket.hashes);
     }
 
+    protected boolean fullyMatches(@Nullable S sExtraData, @Nullable F fExtraData) {
+        return true;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -124,9 +140,8 @@ public class SubstringBucket extends HashBucket implements AutoCloseable {
         }
         if (obj instanceof FingerprintBucket) {
             // match with FingerprintBucket including extra data
-            final FingerprintBucket fingerprintBucket = (FingerprintBucket) obj;
-            return containsHashes(fingerprintBucket)
-                    && HashBucketFilter.matchExtraData(fingerprintBucket.extraData, extraData);
+            @SuppressWarnings("unchecked") final FingerprintBucket<F> fingerprintBucket = (FingerprintBucket<F>) obj;
+            return containsHashes(fingerprintBucket) && fullyMatches(this.extraData, fingerprintBucket.extraData);
         }
         return false;
     }

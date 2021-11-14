@@ -3,12 +3,12 @@ package io.github.edsuns.adblock.util.bucket;
 /**
  * Created by Edsuns@qq.com on 2021/8/21.
  */
-class FingerprintGenerator implements SubstringGenerator {
+public class FingerprintGenerator implements SubstringGenerator {
 
     private char[] buffer;
     private int end = -1;
 
-    private boolean isSeparatorChar(char c) {
+    protected boolean isSeparatorChar(char c) {
         return c == '*' || c == '^' || c == '|';
     }
 

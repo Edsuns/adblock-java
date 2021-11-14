@@ -1,5 +1,7 @@
 package io.github.edsuns.adblock.util.bucket;
 
+import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,10 +13,7 @@ import java.util.List;
  * <p>
  * No need to implement multi-thread safe.
  */
-public class FingerprintBucket extends HashBucket {
-
-    public interface ExtraData {
-    }
+public class FingerprintBucket<F extends Serializable> extends HashBucket {
 
     public static class NoFingerprintException extends Exception {
         public NoFingerprintException() {
@@ -22,20 +21,12 @@ public class FingerprintBucket extends HashBucket {
         }
     }
 
-    final ExtraData extraData;
+    @Nullable
+    final F extraData;
 
     public FingerprintBucket(String data) throws NoFingerprintException {
-        this(data.toCharArray(), new ExtraData() {
-        });
-    }
-
-    public FingerprintBucket(String data, ExtraData extraData) throws NoFingerprintException {
-        this(data.toCharArray(), extraData);
-    }
-
-    public FingerprintBucket(char[] data, ExtraData extraData) throws NoFingerprintException {
-        this.extraData = extraData;
-        generateHashes(data, new FingerprintGenerator());
+        this.extraData = generateExtraData(data);
+        generateHashes(data.toCharArray(), createGenerator());
         mainHashIndex = 0;// only need to put the leading substring hash in HashBucketFilter
     }
 
@@ -51,7 +42,28 @@ public class FingerprintBucket extends HashBucket {
         super.hashes = hashList.toArray(new int[0][0]);
     }
 
-    public ExtraData getExtraData() {
+    /**
+     * Create {@link FingerprintGenerator}. Override this method to provide custom generator.
+     *
+     * @return newly created generator
+     */
+    protected FingerprintGenerator createGenerator() {
+        return new FingerprintGenerator();
+    }
+
+    /**
+     * Create extra data from source data.
+     *
+     * @param source data passed from the constructor
+     * @return extra data
+     */
+    @Nullable
+    protected F generateExtraData(String source) {
+        return null;
+    }
+
+    @Nullable
+    public F getExtraData() {
         return extraData;
     }
 
@@ -61,7 +73,8 @@ public class FingerprintBucket extends HashBucket {
             return true;
         }
         if (obj instanceof FingerprintBucket) {
-            return Arrays.deepEquals(hashes, ((FingerprintBucket) obj).hashes);
+            @SuppressWarnings("unchecked") final FingerprintBucket<F> fingerprintBucket = (FingerprintBucket<F>) obj;
+            return Arrays.deepEquals(hashes, fingerprintBucket.hashes);
         }
         // The comparison between FingerprintBucket and SubstringBucket
         // is required to be performed at SubstringBucket.
