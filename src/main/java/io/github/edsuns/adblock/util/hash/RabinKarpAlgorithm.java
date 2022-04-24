@@ -42,27 +42,23 @@ public final class RabinKarpAlgorithm {
      * @see <a href="https://en.wikipedia.org/wiki/Rabin%E2%80%93Karp_algorithm">https://en.wikipedia.org/wiki/Rabin%E2%80%93Karp_algorithm</a>
      */
     public static int search(RollingHash fn, char[] text, char[] target) {
-        final int substringCount = text.length - target.length + 1;
-        final int targetHash = fn.hash(target, target.length);
-        int lastHash = -1;
-        for (int i = 0; i < substringCount; i++) {
-            if (i == 0) {
-                lastHash = fn.hash(text, target.length);
-            } else {
-                lastHash = fn.hash(text, i, target.length, lastHash);
-            }
-            if (lastHash == targetHash) {
+        int n = text.length, m = target.length;
+        if (n < m) return -1;
+        int targetHash = fn.hash(target, m);
+        int hash = fn.hash(text, m);
+        for (int i = 0, end = n - m; ; ) {
+            if (hash == targetHash) {
                 boolean arrEquals = true;
-                for (int j = 0; j < target.length; j++) {
+                for (int j = 0; j < m; j++) {
                     if (text[i + j] != target[j]) {
                         arrEquals = false;
                         break;
                     }
                 }
-                if (arrEquals) {
-                    return i;
-                }
+                if (arrEquals) return i;
             }
+            if (++i > end) break;
+            hash = fn.hash(text, i, m, hash);
         }
         return -1;
     }

@@ -34,5 +34,7 @@ public class RabinFingerprintTest {
         assertEquals(expected2, RabinKarpAlgorithm.search(RabinFingerprint.p31, text, target2));
         assertEquals(expected2, RabinKarpAlgorithm.search(RabinFingerprint.p41, text, target2));
         assertEquals(expected2, RabinKarpAlgorithm.search(RabinFingerprint.p53, text, target2));
+
+        assertEquals(-1, RabinKarpAlgorithm.search(RabinFingerprint.p13, target2, text));
     }
 }
